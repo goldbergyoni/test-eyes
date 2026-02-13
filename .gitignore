@@ -1,0 +1,6 @@
+node_modules/
+dist/
+.turbo/
+*.log
+test-results.xml
+test-data.json
