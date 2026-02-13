@@ -48,6 +48,9 @@ jobs:
           mkdir -p data
           cp apps/example-app/test-data.json "data/$(date +%Y-%m-%d)_${GITHUB_SHA:0:7}.json"
 
+          # Create index.json with list of all files
+          ls data/*.json | sed 's|data/||' | jq -R -s 'split("\n") | map(select(length > 0))' > data/index.json
+
           # Commit and push
           git add data/
           git commit -m "Add test data for ${GITHUB_SHA:0:7}" || echo "No changes"

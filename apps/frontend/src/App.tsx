@@ -58,19 +58,16 @@ export default function App() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const treeRes = await fetch(
-          `https://api.github.com/repos/${OWNER}/${REPO}/git/trees/${BRANCH}?recursive=1`
-        )
-        if (!treeRes.ok) {
-          const text = await treeRes.text()
-          throw new Error(`Failed to fetch data branch: ${treeRes.status} - ${text}`)
-        }
-        const tree = await treeRes.json()
-        const jsonFiles = tree.tree?.filter((f: { path: string }) => f.path.startsWith('data/') && f.path.endsWith('.json')) || []
+        const baseUrl = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/data`
+
+        // Fetch index.json with list of all data files
+        const indexRes = await fetch(`${baseUrl}/index.json`)
+        if (!indexRes.ok) throw new Error('No data yet - run some PRs first')
+        const files: string[] = await indexRes.json()
 
         const runs: TestRun[] = []
-        for (const file of jsonFiles) {
-          const res = await fetch(`https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/${file.path}`)
+        for (const file of files.filter(f => f !== 'index.json')) {
+          const res = await fetch(`${baseUrl}/${file}`)
           if (res.ok) runs.push(await res.json())
         }
 
