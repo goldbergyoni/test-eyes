@@ -1,0 +1,14 @@
+{
+  "name": "example-app",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:ci": "vitest run --reporter=junit --outputFile=test-results.xml",
+    "parse-junit": "node scripts/parse-junit.js"
+  },
+  "devDependencies": {
+    "fast-xml-parser": "^4.5.1",
+    "vitest": "^3.0.5"
+  }
+}
