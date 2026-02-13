@@ -61,7 +61,10 @@ export default function App() {
         const treeRes = await fetch(
           `https://api.github.com/repos/${OWNER}/${REPO}/git/trees/${BRANCH}?recursive=1`
         )
-        if (!treeRes.ok) throw new Error('Failed to fetch data branch')
+        if (!treeRes.ok) {
+          const text = await treeRes.text()
+          throw new Error(`Failed to fetch data branch: ${treeRes.status} - ${text}`)
+        }
         const tree = await treeRes.json()
         const jsonFiles = tree.tree?.filter((f: { path: string }) => f.path.startsWith('data/') && f.path.endsWith('.json')) || []
 
