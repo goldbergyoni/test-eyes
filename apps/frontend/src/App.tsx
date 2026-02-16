@@ -1,77 +1,87 @@
 import { useEffect, useState } from 'react'
-import { useReactTable, getCoreRowModel, flexRender, createColumnHelper } from '@tanstack/react-table'
+import { useReactTable, getCoreRowModel, getSortedRowModel, flexRender, createColumnHelper } from '@tanstack/react-table'
+import type { SortingState } from '@tanstack/react-table'
 
-const OWNER = 'goldbergyoni'
-const REPO = 'test-eyes'
-const BRANCH = 'gh-data'
-
-interface TestRun {
-  runId: string
-  prNumber: number
-  commitSha: string
-  createdAt: string
-  tests: { name: string; durationMs: number; status: 'passed' | 'failed' }[]
+interface AggregatedData {
+  schemaVersion: string
+  meta: {
+    totalRuns: number
+    lastAggregatedAt: string
+    processedFiles: string[]
+  }
+  tests: Record<string, TestStats>
 }
 
-interface AggregatedTest {
-  name: string
+interface TestStats {
+  totalRuns: number
+  passCount: number
+  failCount: number
   avgDurationMs: number
-  failures: number
-  runs: number
+  p95DurationMs: number
 }
 
-const columnHelper = createColumnHelper<AggregatedTest>()
+interface TestRow {
+  name: string
+  totalRuns: number
+  passCount: number
+  failCount: number
+  avgDurationMs: number
+  p95DurationMs: number
+}
 
-const columns = [
+const columnHelper = createColumnHelper<TestRow>()
+
+const overviewColumns = [
   columnHelper.accessor('name', { header: 'Test Name', cell: info => info.getValue() }),
   columnHelper.accessor('avgDurationMs', {
     header: 'Avg Time (s)',
     cell: info => (info.getValue() / 1000).toFixed(2),
   }),
-  columnHelper.accessor('failures', { header: 'Failures', cell: info => info.getValue() }),
-  columnHelper.accessor('runs', { header: 'Runs', cell: info => info.getValue() }),
+  columnHelper.accessor('failCount', { header: 'Failures', cell: info => info.getValue() }),
+  columnHelper.accessor('totalRuns', { header: 'Runs', cell: info => info.getValue() }),
 ]
 
-function aggregateTests(runs: TestRun[]): AggregatedTest[] {
-  const map = new Map<string, { durations: number[]; failures: number }>()
-  for (const run of runs) {
-    for (const test of run.tests) {
-      const entry = map.get(test.name) || { durations: [], failures: 0 }
-      entry.durations.push(test.durationMs)
-      if (test.status === 'failed') entry.failures++
-      map.set(test.name, entry)
-    }
-  }
-  return Array.from(map.entries()).map(([name, data]) => ({
-    name,
-    avgDurationMs: data.durations.reduce((a, b) => a + b, 0) / data.durations.length,
-    failures: data.failures,
-    runs: data.durations.length,
-  }))
-}
+const slowestColumns = [
+  columnHelper.accessor('name', { header: 'Test Name', cell: info => info.getValue() }),
+  columnHelper.accessor('p95DurationMs', {
+    header: 'p95 Time (s)',
+    cell: info => (info.getValue() / 1000).toFixed(2),
+  }),
+  columnHelper.accessor('avgDurationMs', {
+    header: 'Avg Time (s)',
+    cell: info => (info.getValue() / 1000).toFixed(2),
+  }),
+  columnHelper.accessor('totalRuns', { header: 'Runs', cell: info => info.getValue() }),
+]
 
 export default function App() {
-  const [data, setData] = useState<AggregatedTest[]>([])
+  const [data, setData] = useState<TestRow[]>([])
+  const [meta, setMeta] = useState<AggregatedData['meta'] | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [overviewSorting, setOverviewSorting] = useState<SortingState>([])
+  const [slowestSorting, setSllowestSorting] = useState<SortingState>([{ id: 'p95DurationMs', desc: true }])
 
   useEffect(() => {
     async function fetchData() {
       try {
         const baseUrl = `${import.meta.env.BASE_URL}data`
+        const res = await fetch(`${baseUrl}/main-test-data.json`)
 
-        // Fetch index.json with list of all data files
-        const indexRes = await fetch(`${baseUrl}/index.json`)
-        if (!indexRes.ok) throw new Error('No data yet - run some PRs first')
-        const files: string[] = await indexRes.json()
-
-        const runs: TestRun[] = []
-        for (const file of files.filter(f => f !== 'index.json')) {
-          const res = await fetch(`${baseUrl}/${file}`)
-          if (res.ok) runs.push(await res.json())
+        if (!res.ok) {
+          // Fallback: try old format
+          throw new Error('No aggregated data yet - waiting for aggregation to run')
         }
 
-        setData(aggregateTests(runs))
+        const aggregated: AggregatedData = await res.json()
+
+        const rows: TestRow[] = Object.entries(aggregated.tests).map(([name, stats]) => ({
+          name,
+          ...stats
+        }))
+
+        setData(rows)
+        setMeta(aggregated.meta)
       } catch (e) {
         setError(e instanceof Error ? e.message : 'Unknown error')
       } finally {
@@ -81,41 +91,80 @@ export default function App() {
     fetchData()
   }, [])
 
-  const table = useReactTable({ data, columns, getCoreRowModel: getCoreRowModel() })
+  const overviewTable = useReactTable({
+    data,
+    columns: overviewColumns,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    state: { sorting: overviewSorting },
+    onSortingChange: setOverviewSorting,
+  })
+
+  const slowestTable = useReactTable({
+    data,
+    columns: slowestColumns,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    state: { sorting: slowestSorting },
+    onSortingChange: setSllowestSorting,
+  })
+
+  const renderTable = (table: ReturnType<typeof useReactTable<TestRow>>) => (
+    <table className="w-full border-collapse">
+      <thead>
+        {table.getHeaderGroups().map(hg => (
+          <tr key={hg.id} className="border-b border-gray-700">
+            {hg.headers.map(h => (
+              <th
+                key={h.id}
+                className="text-left p-3 font-semibold cursor-pointer hover:bg-gray-800"
+                onClick={h.column.getToggleSortingHandler()}
+              >
+                {flexRender(h.column.columnDef.header, h.getContext())}
+                {{ asc: ' ↑', desc: ' ↓' }[h.column.getIsSorted() as string] ?? ''}
+              </th>
+            ))}
+          </tr>
+        ))}
+      </thead>
+      <tbody>
+        {table.getRowModel().rows.map(row => (
+          <tr key={row.id} className="border-b border-gray-800 hover:bg-gray-800">
+            {row.getVisibleCells().map(cell => (
+              <td key={cell.id} className="p-3">
+                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+              </td>
+            ))}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  )
 
   return (
     <div className="min-h-screen bg-gray-900 text-white p-8">
-      <h1 className="text-3xl font-bold mb-2">Test History Dashboard</h1>
-      <p className="text-gray-400 mb-6">Repo: {OWNER}/{REPO} | Data branch: {BRANCH}</p>
+      <h1 className="text-3xl font-bold mb-2">Test Eyes Dashboard</h1>
+      {meta && (
+        <p className="text-gray-400 mb-6">
+          {meta.totalRuns} runs | Last updated: {new Date(meta.lastAggregatedAt).toLocaleString()}
+        </p>
+      )}
 
       {loading && <p>Loading...</p>}
       {error && <p className="text-red-400">Error: {error}</p>}
 
-      {!loading && !error && (
-        <table className="w-full border-collapse">
-          <thead>
-            {table.getHeaderGroups().map(hg => (
-              <tr key={hg.id} className="border-b border-gray-700">
-                {hg.headers.map(h => (
-                  <th key={h.id} className="text-left p-3 font-semibold">
-                    {flexRender(h.column.columnDef.header, h.getContext())}
-                  </th>
-                ))}
-              </tr>
-            ))}
-          </thead>
-          <tbody>
-            {table.getRowModel().rows.map(row => (
-              <tr key={row.id} className="border-b border-gray-800 hover:bg-gray-800">
-                {row.getVisibleCells().map(cell => (
-                  <td key={cell.id} className="p-3">
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      {!loading && !error && data.length > 0 && (
+        <>
+          <section className="mb-12">
+            <h2 className="text-xl font-semibold mb-4">Test Overview</h2>
+            {renderTable(overviewTable)}
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold mb-4">Slowest Tests (by p95)</h2>
+            {renderTable(slowestTable)}
+          </section>
+        </>
       )}
 
       {!loading && !error && data.length === 0 && (

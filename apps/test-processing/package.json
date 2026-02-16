@@ -1,0 +1,9 @@
+{
+  "name": "test-processing",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "aggregate": "node scripts/aggregate.js"
+  }
+}

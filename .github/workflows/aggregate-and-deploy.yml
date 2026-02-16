@@ -1,0 +1,81 @@
+name: Aggregate Data and Deploy
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'  # Every 6 hours
+  workflow_dispatch:       # Manual trigger
+  workflow_run:            # After test data collection
+    workflows: ["Collect Test Data"]
+    types: [completed]
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  aggregate-and-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - run: pnpm install
+
+      # Fetch data branch
+      - name: Fetch data branch
+        run: |
+          git fetch origin gh-data || true
+          git checkout origin/gh-data -- data/ 2>/dev/null || mkdir -p data
+
+      # Run aggregation
+      - name: Aggregate test data
+        run: node apps/test-processing/scripts/aggregate.js data
+
+      # Commit aggregated data back to gh-data
+      - name: Commit aggregated data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git stash
+          git checkout gh-data || git checkout --orphan gh-data
+          git stash pop || true
+          git add data/
+          git commit -m "Aggregate test data" || echo "No changes"
+          git push origin gh-data
+
+      # Build frontend
+      - name: Checkout main for frontend build
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          clean: false
+
+      - run: pnpm install
+
+      - name: Build frontend
+        run: pnpm --filter frontend build
+
+      - name: Copy aggregated data to frontend
+        run: |
+          git fetch origin gh-data
+          git checkout origin/gh-data -- data/ 2>/dev/null || true
+          cp -r data apps/frontend/dist/ || true
+
+      - uses: actions/configure-pages@v4
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: apps/frontend/dist
+
+      - id: deployment
+        uses: actions/deploy-pages@v4
