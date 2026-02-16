@@ -63,7 +63,12 @@ export default function App() {
         )
         if (!treeRes.ok) throw new Error('Failed to fetch data branch')
         const tree = await treeRes.json()
-        const jsonFiles = tree.tree?.filter((f: { path: string }) => f.path.startsWith('data/') && f.path.endsWith('.json')) || []
+        const jsonFiles = tree.tree?.filter((f: { path: string }) =>
+          f.path.startsWith('data/') &&
+          f.path.endsWith('.json') &&
+          !f.path.endsWith('index.json') &&
+          !f.path.endsWith('main-test-data.json')
+        ) || []
 
         const runs: TestRun[] = []
         for (const file of jsonFiles) {
