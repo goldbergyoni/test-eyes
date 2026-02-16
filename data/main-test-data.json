@@ -1,29 +1,49 @@
 {
   "schemaVersion": "1.0.0",
   "meta": {
+<<<<<<< Updated upstream
     "totalRuns": 2,
     "lastAggregatedAt": "2026-02-16T13:25:55.741Z",
     "processedFiles": [
       "2026-02-13_3c8bd9e.json",
       "2026-02-13_c3d2a12.json"
+=======
+    "totalRuns": 3,
+    "lastAggregatedAt": "2026-02-16T15:28:50.019Z",
+    "processedFiles": [
+      "2026-02-13_3c8bd9e.json",
+      "2026-02-13_c3d2a12.json",
+      "2026-02-16_0006e62.json"
+>>>>>>> Stashed changes
     ]
   },
   "tests": {
     "tests/app.test.ts auth > should login successfully": {
+<<<<<<< Updated upstream
       "totalRuns": 2,
       "passCount": 2,
+=======
+      "totalRuns": 3,
+      "passCount": 3,
+>>>>>>> Stashed changes
       "failCount": 0,
       "avgDurationMs": 1,
       "p95DurationMs": 1
     },
     "tests/app.test.ts payments > should charge card": {
+<<<<<<< Updated upstream
       "totalRuns": 2,
       "passCount": 2,
+=======
+      "totalRuns": 3,
+      "passCount": 3,
+>>>>>>> Stashed changes
       "failCount": 0,
       "avgDurationMs": 1503,
       "p95DurationMs": 1503
     },
     "tests/app.test.ts profile > should load user data": {
+<<<<<<< Updated upstream
       "totalRuns": 2,
       "passCount": 1,
       "failCount": 1,
@@ -33,6 +53,17 @@
     "tests/app.test.ts notifications > should send email": {
       "totalRuns": 2,
       "passCount": 2,
+=======
+      "totalRuns": 3,
+      "passCount": 2,
+      "failCount": 1,
+      "avgDurationMs": 2,
+      "p95DurationMs": 3
+    },
+    "tests/app.test.ts notifications > should send email": {
+      "totalRuns": 3,
+      "passCount": 3,
+>>>>>>> Stashed changes
       "failCount": 0,
       "avgDurationMs": 0,
       "p95DurationMs": 0
