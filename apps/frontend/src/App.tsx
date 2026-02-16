@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useReactTable, getCoreRowModel, getSortedRowModel, flexRender, createColumnHelper } from '@tanstack/react-table'
 import type { SortingState } from '@tanstack/react-table'
+import { Title } from '@test-eyes/design-system'
 
 interface AggregatedData {
   schemaVersion: string
@@ -143,7 +144,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white p-8">
-      <h1 className="text-3xl font-bold mb-2">Test Eyes Dashboard</h1>
+      <Title size="h2" className="mb-2">Test Eyes Dashboard</Title>
       {meta && (
         <p className="text-gray-400 mb-6">
           {meta.totalRuns} runs | Last updated: {new Date(meta.lastAggregatedAt).toLocaleString()}

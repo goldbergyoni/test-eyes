@@ -1,4 +1,3 @@
-import * as React from 'react'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '../utils/cn'
 
@@ -22,20 +21,16 @@ export interface TitleProps
   as?: 'h1' | 'h2' | 'h3' | 'h4'
 }
 
-const Title = React.forwardRef<HTMLHeadingElement, TitleProps>(
-  ({ className, size, as, children, ...props }, ref) => {
-    const Component = as || size || 'h1'
-    return (
-      <Component
-        className={cn(titleVariants({ size, className }))}
-        ref={ref}
-        {...props}
-      >
-        {children}
-      </Component>
-    )
-  }
-)
-Title.displayName = 'Title'
+function Title({ className, size, as, children, ...props }: TitleProps) {
+  const Component = as || size || 'h1'
+  return (
+    <Component
+      className={cn(titleVariants({ size, className }))}
+      {...props}
+    >
+      {children}
+    </Component>
+  )
+}
 
 export { Title, titleVariants }
