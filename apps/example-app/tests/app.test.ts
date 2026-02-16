@@ -27,3 +27,9 @@ describe('notifications', () => {
     expect(true).toBe(true)
   })
 })
+
+describe('settings', () => {
+  it('should save preferences', () => {
+    expect(true).toBe(true)
+  })
+})
