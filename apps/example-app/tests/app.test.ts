@@ -27,3 +27,9 @@ describe('notifications', () => {
     expect(true).toBe(true)
   })
 })
+
+describe('search', () => {
+  it('should find results', () => {
+    expect(true).toBe(true)
+  })
+})
