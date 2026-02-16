@@ -46,9 +46,18 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git stash
-          git checkout gh-data || git checkout --orphan gh-data
-          git stash pop || true
+
+          # Save aggregated data
+          cp -r data /tmp/aggregated-data
+
+          # Checkout gh-data branch cleanly
+          git fetch origin gh-data
+          git checkout gh-data
+          git pull origin gh-data
+
+          # Copy aggregated data back
+          cp -r /tmp/aggregated-data/* data/
+
           git add data/
           git commit -m "Aggregate test data" || echo "No changes"
           git push origin gh-data
