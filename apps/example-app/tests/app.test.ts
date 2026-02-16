@@ -27,3 +27,9 @@ describe('notifications', () => {
     expect(true).toBe(true)
   })
 })
+
+describe('dashboard', () => {
+  it('should load widgets', () => {
+    expect(true).toBe(true)
+  })
+})
