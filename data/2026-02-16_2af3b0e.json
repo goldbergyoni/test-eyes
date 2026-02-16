@@ -1,0 +1,33 @@
+{
+  "runId": "2026-02-16_2af3b0e",
+  "prNumber": 4,
+  "commitSha": "2af3b0eebfe51cb31ed06edb56d2e076a1373afc",
+  "createdAt": "2026-02-16T15:45:03.818Z",
+  "tests": [
+    {
+      "name": "tests/app.test.ts auth > should login successfully",
+      "durationMs": 2,
+      "status": "passed"
+    },
+    {
+      "name": "tests/app.test.ts payments > should charge card",
+      "durationMs": 1502,
+      "status": "passed"
+    },
+    {
+      "name": "tests/app.test.ts profile > should load user data",
+      "durationMs": 0,
+      "status": "passed"
+    },
+    {
+      "name": "tests/app.test.ts notifications > should send email",
+      "durationMs": 0,
+      "status": "passed"
+    },
+    {
+      "name": "tests/app.test.ts dashboard > should load widgets",
+      "durationMs": 0,
+      "status": "passed"
+    }
+  ]
+}
