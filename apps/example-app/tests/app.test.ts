@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest'
 
+// Test run for DoD video demonstration
+
 describe('auth', () => {
   it('should login successfully', () => {
     expect(true).toBe(true)
