@@ -1,17 +1,28 @@
 {
   "schemaVersion": "1.0.0",
   "meta": {
+<<<<<<< Updated upstream
     "totalRuns": 4,
     "lastAggregatedAt": "2026-02-16T15:45:28.922Z",
+=======
+    "totalRuns": 5,
+    "lastAggregatedAt": "2026-02-16T15:56:34.429Z",
+>>>>>>> Stashed changes
     "processedFiles": [
       "2026-02-13_3c8bd9e.json",
       "2026-02-13_c3d2a12.json",
       "2026-02-16_0006e62.json",
+<<<<<<< Updated upstream
       "2026-02-16_2af3b0e.json"
+=======
+      "2026-02-16_2af3b0e.json",
+      "2026-02-16_b4e71e0.json"
+>>>>>>> Stashed changes
     ]
   },
   "tests": {
     "tests/app.test.ts auth > should login successfully": {
+<<<<<<< Updated upstream
       "totalRuns": 4,
       "passCount": 4,
       "failCount": 0,
@@ -21,20 +32,41 @@
     "tests/app.test.ts payments > should charge card": {
       "totalRuns": 4,
       "passCount": 4,
+=======
+      "totalRuns": 5,
+      "passCount": 5,
+      "failCount": 0,
+      "avgDurationMs": 1,
+      "p95DurationMs": 1
+    },
+    "tests/app.test.ts payments > should charge card": {
+      "totalRuns": 5,
+      "passCount": 5,
+>>>>>>> Stashed changes
       "failCount": 0,
       "avgDurationMs": 1503,
       "p95DurationMs": 1503
     },
     "tests/app.test.ts profile > should load user data": {
+<<<<<<< Updated upstream
       "totalRuns": 4,
       "passCount": 3,
+=======
+      "totalRuns": 5,
+      "passCount": 4,
+>>>>>>> Stashed changes
       "failCount": 1,
       "avgDurationMs": 2,
       "p95DurationMs": 2
     },
     "tests/app.test.ts notifications > should send email": {
+<<<<<<< Updated upstream
       "totalRuns": 4,
       "passCount": 4,
+=======
+      "totalRuns": 5,
+      "passCount": 5,
+>>>>>>> Stashed changes
       "failCount": 0,
       "avgDurationMs": 0,
       "p95DurationMs": 0
@@ -45,6 +77,19 @@
       "failCount": 0,
       "avgDurationMs": 0,
       "p95DurationMs": 0
+<<<<<<< Updated upstream
     }
   }
 }
+=======
+    },
+    "tests/app.test.ts search > should find results": {
+      "totalRuns": 1,
+      "passCount": 1,
+      "failCount": 0,
+      "avgDurationMs": 0,
+      "p95DurationMs": 0
+    }
+  }
+}
+>>>>>>> Stashed changes
