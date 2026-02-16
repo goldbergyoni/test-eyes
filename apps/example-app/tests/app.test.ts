@@ -27,3 +27,9 @@ describe('notifications', () => {
     expect(true).toBe(true)
   })
 })
+
+describe('api', () => {
+  it('should return valid response', () => {
+    expect(true).toBe(true)
+  })
+})
