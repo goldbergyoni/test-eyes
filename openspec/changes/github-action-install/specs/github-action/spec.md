@@ -1,27 +1,45 @@
-## Composite Action
+## Composite Action Spec
 
-### Inputs
+Location: `apps/github-action/action.yml`
 
-- `junit-path` (required) - path to JUnit XML
-- `data-branch` (optional, default: `gh-data`)
+### Definition
 
-### Steps
+```yaml
+name: 'Test Eyes - Collect Test Data'
+description: 'Parse JUnit XML and aggregate test statistics'
 
-1. Validate junit-path exists
-2. Run `apps/test-processing` parse script
-3. Git commit to data branch
-4. Run `apps/test-processing` aggregate script
+inputs:
+  junit-path:
+    description: 'Path to JUnit XML file'
+    required: true
+  data-branch:
+    description: 'Branch for storing test data'
+    required: false
+    default: 'gh-data'
 
-### Scenarios
+runs:
+  using: composite
+  steps:
+    # 1. Validate input file exists
+    # 2. Parse JUnit XML to JSON (calls test-processing)
+    # 3. Git commit to data branch
+    # 4. Aggregate data (calls test-processing)
+```
 
-#### Missing file
-- **WHEN** junit-path doesn't exist
-- **THEN** fail with clear error
+### Error Handling
 
-#### First run
-- **WHEN** data branch doesn't exist
-- **THEN** create orphan branch, commit data
+| Condition | Behavior |
+|-----------|----------|
+| `junit-path` file missing | Fail with: "Error: File not found: {path}" |
+| Parse fails | Fail with parser error message |
+| Git push fails | Fail with git error |
 
-#### Subsequent run
-- **WHEN** data branch exists
-- **THEN** add new JSON, re-aggregate
+### Usage Example
+
+```yaml
+- uses: goldbergyoni/test-eyes@main
+  with:
+    junit-path: test-results.xml
+```
+
+Requires permissions: `contents: write`
