@@ -3,6 +3,7 @@ import { useReactTable, getCoreRowModel, getSortedRowModel, flexRender, createCo
 import type { SortingState } from '@tanstack/react-table'
 import { Title } from '@test-eyes/design-system'
 
+//Yoni: Create /src/pages
 interface AggregatedData {
   schemaVersion: string
   meta: {
@@ -21,6 +22,7 @@ interface TestStats {
   p95DurationMs: number
 }
 
+// These types 👆 are quite similar, use a union type?
 interface TestRow {
   name: string
   totalRuns: number
@@ -67,6 +69,7 @@ export default function App() {
     async function fetchData() {
       try {
         const baseUrl = `${import.meta.env.BASE_URL}data`
+        // Yoni: Let's use TanStack Query, then catch+finally are not needed #low
         const res = await fetch(`${baseUrl}/main-test-data.json`)
 
         if (!res.ok) {
@@ -92,6 +95,8 @@ export default function App() {
     fetchData()
   }, [])
 
+  // Yoni: Important, a huge file, let's break down into components? #high
+
   const overviewTable = useReactTable({
     data,
     columns: overviewColumns,
@@ -111,6 +116,7 @@ export default function App() {
   })
 
   const renderTable = (table: ReturnType<typeof useReactTable<TestRow>>) => (
+    // Yoni: The design system already exports Table/TableRow/TableHead/TableCell — use those instead of raw HTML with duplicated styles
     <table className="w-full border-collapse">
       <thead>
         {table.getHeaderGroups().map(hg => (

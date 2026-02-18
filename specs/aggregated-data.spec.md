@@ -50,3 +50,6 @@ Single JSON file containing pre-computed statistics from all test runs.
 3. For each new file, update test statistics
 4. Recalculate avgDurationMs and p95DurationMs
 5. Write updated `main-test-data.json`
+
+
+// Yoni: What is this file about?, I assume we can delete it

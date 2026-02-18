@@ -1,3 +1,4 @@
+// Yoni: This file should be part of example app
 name: Collect Test Data
 
 on:
@@ -43,6 +44,7 @@ jobs:
           # Fetch or create data branch
           git fetch origin gh-data || true
           git checkout gh-data || git checkout --orphan gh-data
+
 
           # Clean and copy data
           mkdir -p data

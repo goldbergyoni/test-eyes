@@ -1,3 +1,5 @@
+// Yoni: Use TS #high
+// Yoni: minor, but use Async, why? Let me explain #low
 import { readFileSync, writeFileSync, readdirSync, existsSync } from 'fs'
 
 const DATA_DIR = process.argv[2] || 'data'
@@ -26,6 +28,7 @@ function findNewFiles(processedFiles) {
     f !== 'main-test-data.json' &&
     f !== 'index.json'
   )
+  // Yoni: processedFiles grows unbounded and .includes() is O(n) per file — use a Set or timestamp watermark #high
   return allFiles.filter(f => !processedFiles.includes(f))
 }
 
@@ -39,6 +42,8 @@ function calculateP95(values) {
 
 // Main aggregation
 function aggregate() {
+  // Yoni: We need types #high
+  // Yoni important: The function is long, le's consider <20 #high
   const data = loadExistingData()
   const newFiles = findNewFiles(data.meta.processedFiles)
 
@@ -60,6 +65,7 @@ function aggregate() {
   // Process each new file
   for (const filename of newFiles) {
     const filepath = `${DATA_DIR}/${filename}`
+    // Yoni: No validation on the parsed JSON — a single malformed file crashes the entire aggregation with no useful error
     const runData = JSON.parse(readFileSync(filepath, 'utf-8'))
 
     data.meta.totalRuns++
@@ -101,6 +107,7 @@ function aggregate() {
     stats.p95DurationMs = calculateP95(testDurations)
   }
 
+  // Yoni: Great for diagnostic
   data.meta.lastAggregatedAt = new Date().toISOString()
 
   writeFileSync(OUTPUT_FILE, JSON.stringify(data, null, 2))
@@ -110,4 +117,5 @@ function aggregate() {
   return true
 }
 
+// Yoni: I'd avoid floating functions, let the gitub action call the main function here
 aggregate()
