@@ -22,4 +22,4 @@ pnpm test       # Run tests
 
 ## Rules
 
-Before coding, read `.claude/rules/golden-rules.md`. 
+Before coding, read `.claude/rules/golden-rules.md`.
