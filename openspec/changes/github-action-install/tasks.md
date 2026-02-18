@@ -1,22 +1,19 @@
 ## Tasks
 
-### 1. Create action structure
-- [ ] Create `.github/actions/collect-test-data/`
-- [ ] Create `action.yml` (using: node20, inputs: junit-path, data-branch)
-- [ ] Create `package.json` with: `@actions/core`, `@actions/exec`, `fast-xml-parser`
+### 1. Create composite action
+- [ ] Create `apps/github-action/action.yml`
+- [ ] Set `using: composite`
+- [ ] Define inputs: `junit-path` (required), `data-branch` (default: `gh-data`)
 
-### 2. Create src/index.js
-- [ ] Import parse logic from `apps/test-processing`
-- [ ] Add git commit logic (reuse from workflow, but in JS not bash)
-- [ ] Add error: "JUnit file not found: {path}" when file missing
-- [ ] Use `@actions/core` for inputs/logging, `@actions/exec` for git
+### 2. Implement composite steps
+- [ ] Validate: `test -f ${{ inputs.junit-path }} || (echo "Error: File not found: ${{ inputs.junit-path }}" && exit 1)`
+- [ ] Parse: `node apps/example-app/scripts/parse-junit.js ${{ inputs.junit-path }} test-data.json`
+- [ ] Git: config user, fetch/create data branch, commit JSON to `data/`
+- [ ] Aggregate: `node apps/test-processing/scripts/aggregate.js data`
 
-### 3. Bundle
-- [ ] `npx ncc build src/index.js -o dist`
-- [ ] Commit `dist/index.js`
+### 3. Update workflow
+- [ ] Replace inline steps in `collect-test-data.yml` with action usage
 
-### 4. Update workflow
-- [ ] Simplify `collect-test-data.yml` to use action
-
-### 5. README
-- [ ] Add installation guide with usage example and required permissions
+### 4. Add README
+- [ ] Installation guide in `apps/github-action/README.md`
+- [ ] Usage example with permissions needed

@@ -1,47 +1,48 @@
-# Change: Extract Reusable GitHub Action for Test Data Collection
+# Change: Extract Reusable GitHub Action
 
 Based on: `openspec/research/extract-github-action.md`
 
-Coding rules: `.claude/rules/golden-rules.md`
-
 ## Goal
 
-Extract inline workflow steps into reusable Node action so any repo can use:
+Extract test data collection logic from workflow into a reusable **composite action**.
 
 ```yaml
-- uses: goldbergyoni/test-eyes/.github/actions/collect-test-data@main
+- uses: goldbergyoni/test-eyes@main
   with:
     junit-path: test-results.xml
 ```
 
-## Architecture
+## Why Composite Action
 
-```
-BEFORE (inlined in workflow):
-  collect-test-data.yml → parse JUnit + git commit
-
-AFTER (extracted):
-  collect-test-data.yml → uses: ./.github/actions/collect-test-data
-```
+- `using: composite` - no build step, no bundling
+- Shell steps call existing scripts directly
+- Simpler than Node action (no `@actions/core`, no `ncc build`)
 
 ## Structure
 
-Keep existing folder structure. Action reuses `apps/test-processing`:
-
 ```
-.github/actions/collect-test-data/
-├── action.yml       # using: node20, inputs: junit-path, data-branch
-├── package.json     # @actions/core, @actions/exec, fast-xml-parser
-├── src/index.js     # imports from apps/test-processing
-└── dist/index.js    # ncc bundle (committed)
+apps/github-action/
+├── action.yml       # composite action definition
+└── README.md        # installation guide
+
+# Existing scripts (unchanged):
+apps/example-app/scripts/parse-junit.js     # JUnit XML → JSON
+apps/test-processing/scripts/aggregate.js   # aggregate stats
 ```
 
-Action is **Node-based** (`using: node20`), not composite. Bundled with `ncc`.
+## action.yml Steps
+
+1. **Validate** - `test -f` with error message on failure
+2. **Parse** - `node apps/example-app/scripts/parse-junit.js`
+3. **Git** - config user, fetch/create data branch, commit JSON
+4. **Aggregate** - `node apps/test-processing/scripts/aggregate.js`
 
 ## Inputs
 
-- `junit-path` (required) - path to JUnit XML
-- `data-branch` (optional, default: `gh-data`)
+| Input | Required | Default | Description |
+|-------|----------|---------|-------------|
+| `junit-path` | yes | - | Path to JUnit XML file |
+| `data-branch` | no | `gh-data` | Branch for storing data |
 
 ## Out of Scope
 
