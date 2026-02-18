@@ -1,70 +1,50 @@
-# Change: One-Step GitHub Action Installation
+# Change: Extract Reusable GitHub Action for Test Data Collection
 
-## Why
+Based on: `openspec/research/extract-github-action.md`
 
-Currently, users need to set up multiple workflows and scripts to use test-eyes. The goal is to make installation as simple as:
+Coding rules: `.claude/rules/golden-rules.md`
 
-1. Assign GitHub Pages permissions
-2. Add a single action step to their workflow
+## Goal
 
-This reduces friction and makes test-eyes accessible to any project with JUnit test output.
-
-## What Changes
-
-Add a reusable GitHub Action (`action.yml`) at the repository root that users can call with:
+Extract inline workflow steps into reusable Node action so any repo can use:
 
 ```yaml
-uses: goldbergyoni/test-eyes@v1
-with:
-  junit-path: './junit.xml'
-  cache_duration_in_minutes: 60
+- uses: goldbergyoni/test-eyes/.github/actions/collect-test-data@main
+  with:
+    junit-path: test-results.xml
 ```
 
-The action will:
-- Parse the provided JUnit XML file to JSON
-- Commit raw test data to the `gh-data` branch
-- Trigger aggregation of test statistics
-- Deploy the dashboard to GitHub Pages
+## Architecture
 
-## Technical Approach
-
-**Keep it simple - reuse existing scripts:**
-- Use `parse-junit.js` from `apps/example-app/scripts/` (copy into action)
-- Use `aggregate.js` from `apps/test-processing/scripts/` (copy into action)
-- Bundle a minimal pre-built frontend for deployment
-
-**Action structure:**
 ```
-/
-├── action.yml           # Action metadata and inputs
-├── action/
-│   ├── entrypoint.sh   # Main script orchestrating the flow
-│   ├── parse-junit.js  # JUnit XML to JSON parser
-│   └── aggregate.js    # Statistics aggregation
+BEFORE (inlined in workflow):
+  collect-test-data.yml → parse JUnit + git commit
+
+AFTER (extracted):
+  collect-test-data.yml → uses: ./.github/actions/collect-test-data
 ```
 
-**Inputs:**
-- `junit-path` (required): Path to JUnit XML file
-- `cache_duration_in_minutes` (optional, default: 60): Not used in v1, reserved for future caching
+## Structure
 
-## Impact
+Keep existing folder structure. Action reuses `apps/test-processing`:
 
-- **New files:**
-  - `/action.yml` - GitHub Action definition
-  - `/action/entrypoint.sh` - Main orchestration script
-  - `/action/parse-junit.js` - Copied from example-app
-  - `/action/aggregate.js` - Copied from test-processing
-  - `/action/frontend-dist/` - Pre-built frontend files
+```
+.github/actions/collect-test-data/
+├── action.yml       # using: node20, inputs: junit-path, data-branch
+├── package.json     # @actions/core, @actions/exec, fast-xml-parser
+├── src/index.js     # imports from apps/test-processing
+└── dist/index.js    # ncc bundle (committed)
+```
 
-- **No changes to existing code** - The action is self-contained
+Action is **Node-based** (`using: node20`), not composite. Bundled with `ncc`.
 
-- **User requirements:**
-  - Must enable GitHub Pages (Settings > Pages > GitHub Actions)
-  - Must have `contents: write`, `pages: write`, `id-token: write` permissions
+## Inputs
 
-## Out of Scope (Keep Simple)
+- `junit-path` (required) - path to JUnit XML
+- `data-branch` (optional, default: `gh-data`)
 
-- No caching implementation in v1 (input reserved for future)
-- No custom dashboard themes
-- No branch protection handling
-- No multi-repo aggregation
+## Out of Scope
+
+- Caching
+- Custom themes
+- Branch protection
