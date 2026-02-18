@@ -1,37 +1,42 @@
 # Change: Extract Reusable GitHub Action for Test Data Collection
 
-Based on: `openspec/research/extract-github-action.md` + Yoni's feedback
+Based on: `openspec/research/extract-github-action.md`
+
+Coding rules: `.claude/rules/golden-rules.md`
 
 ## Goal
 
-Create composite action that calls existing `apps/test-processing` scripts:
+Extract inline workflow steps into reusable Node action so any repo can use:
 
 ```yaml
-- uses: goldbergyoni/test-eyes@main
+- uses: goldbergyoni/test-eyes/.github/actions/collect-test-data@main
   with:
     junit-path: test-results.xml
 ```
 
+## Architecture
+
+```
+BEFORE (inlined in workflow):
+  collect-test-data.yml → parse JUnit + git commit
+
+AFTER (extracted):
+  collect-test-data.yml → uses: ./.github/actions/collect-test-data
+```
+
 ## Structure
 
-New app for the action, calls existing scripts:
+Keep existing folder structure. Action reuses `apps/test-processing`:
 
 ```
-apps/github-action/
-└── action.yml       # composite action
-
-apps/test-processing/
-└── scripts/         # existing scripts (no changes)
+.github/actions/collect-test-data/
+├── action.yml       # using: node20, inputs: junit-path, data-branch
+├── package.json     # @actions/core, @actions/exec, fast-xml-parser
+├── src/index.js     # imports from apps/test-processing
+└── dist/index.js    # ncc bundle (committed)
 ```
 
-## action.yml
-
-Composite action (`using: composite`) with shell steps:
-1. Parse JUnit XML → calls existing parse script
-2. Git commit to data branch
-3. Aggregate → calls existing aggregate script
-
-No build step. No bundling. Just shell commands calling existing JS files.
+Action is **Node-based** (`using: node20`), not composite. Bundled with `ncc`.
 
 ## Inputs
 

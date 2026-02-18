@@ -1,22 +1,23 @@
-## Composite Action
+## collect-test-data action
 
 ### Inputs
 
 - `junit-path` (required) - path to JUnit XML
 - `data-branch` (optional, default: `gh-data`)
 
-### Steps
+### Behavior
 
 1. Validate junit-path exists
-2. Run `apps/test-processing` parse script
-3. Git commit to data branch
-4. Run `apps/test-processing` aggregate script
+2. Parse JUnit XML → JSON
+3. Git: configure bot user, fetch/create orphan branch
+4. Commit JSON as `{date}_{sha}.json`, update `index.json`
+5. Push to data branch
 
 ### Scenarios
 
 #### Missing file
 - **WHEN** junit-path doesn't exist
-- **THEN** fail with clear error
+- **THEN** fail with "JUnit file not found: {path}"
 
 #### First run
 - **WHEN** data branch doesn't exist
@@ -24,4 +25,4 @@
 
 #### Subsequent run
 - **WHEN** data branch exists
-- **THEN** add new JSON, re-aggregate
+- **THEN** add new JSON, update index
