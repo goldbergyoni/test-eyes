@@ -1,0 +1,30 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+language: 'en'
+early_access: false
+
+reviews:
+    request_changes_workflow: false
+    high_level_summary: true
+    poem: false
+    auto_apply_labels: true
+    high_level_summary_instructions: 'Include the following sections: 1. High-level summary 2. Key changes - A one to two lines about what was changed and how 3. Tests summary. Put only 2 bullets with emojis, should it include tests (any functionality that is testable changed), whether tests are indeed included'
+    labeling_instructions:
+        - label: tests
+          instructions: Apply when the PR includes at least 1 test
+        - label: no-tests
+          instructions: Apply when the PR includes functionality changes that can be tested, but no tests exist. This label is not relevant If the PR contains only configuration, testing, CI, and other changes that are not affecting the functionality
+    review_status: true
+    collapse_walkthrough: true
+    path_filters:
+        - '!**/node_modules/**'
+    path_instructions:
+        - path: '**/*'
+          instructions: |
+              - Keep your explanations short, aim for 1-2 sentences
+              - [Danylo put @reference to important rules and skill]
+        - path: '**/*.test.ts'
+          instructions: |
+              - When reviewing test files, it's imperative to check them against the testing rules files under cursor rules (.cursor/rules), and specifically the following files: test-data, test-assertions, test-anatomy, and test-with-dom. If a rule is violated, please include its reference number (e.g., 'F.1. locators are not user facing')
+
+chat:
+    auto_reply: true
