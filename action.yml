@@ -1,21 +1,52 @@
 name: 'Test Eyes'
-description: 'Collect test results and aggregate statistics for the Test Eyes dashboard'
+description: 'Collect test results and deploy analytics dashboard'
+author: 'goldbergyoni'
 
 inputs:
-  data-dir:
-    description: 'Path to the directory containing raw test JSON files'
+  junit-path:
+    description: 'Path to JUnit XML file'
     required: true
-
-outputs:
-  aggregated-file:
-    description: 'Path to the generated aggregated JSON file'
-    value: ${{ steps.aggregate.outputs.output-file }}
+  cache_duration_in_minutes:
+    description: 'Cache duration (reserved for future)'
+    required: false
+    default: '60'
 
 runs:
-  using: 'composite'
+  using: composite
   steps:
-    - name: Aggregate test data
-      id: aggregate
-      uses: ./.github/actions/aggregate-test-data
-      with:
-        data-dir: ${{ inputs.data-dir }}
+    - name: Validate input
+      shell: bash
+      run: |
+        if [ ! -f "${{ inputs.junit-path }}" ]; then
+          echo "::error::File not found: ${{ inputs.junit-path }}"
+          exit 1
+        fi
+
+    - name: Parse JUnit XML
+      shell: bash
+      run: node ${{ github.action_path }}/apps/example-app/scripts/parse-junit.js "${{ inputs.junit-path }}" test-data.json
+
+    - name: Commit and aggregate
+      shell: bash
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+
+        # Fetch both branches in one call
+        git fetch origin main gh-data 2>/dev/null || git fetch origin main
+
+        # Checkout or create data branch
+        git checkout gh-data 2>/dev/null || git checkout --orphan gh-data
+
+        # Setup data directory and copy new test data
+        mkdir -p data
+        cp ${{ github.workspace }}/test-data.json "data/$(date +%Y-%m-%d)_${GITHUB_SHA:0:7}.json"
+
+        # Get and run aggregate script from main
+        git checkout origin/main -- apps/test-processing/scripts/aggregate.js
+        node apps/test-processing/scripts/aggregate.js data
+
+        # Commit and push
+        git add data/
+        git diff --staged --quiet || git commit -m "Add test data for ${GITHUB_SHA:0:7}"
+        git push origin gh-data

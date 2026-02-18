@@ -28,7 +28,6 @@ jobs:
         working-directory: apps/example-app
         run: pnpm test:ci || true
 
-      - uses: test-eyes/smart-reporter@v1
+      - uses: ./
         with:
-          junit-path: './junit.xml'
-          post-comment-with-link-to-report: true
+          junit-path: apps/example-app/test-results.xml
