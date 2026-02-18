@@ -1,10 +1,10 @@
-# Change: Extract Reusable GitHub Action for Test Data Collection
+# Change: Extract Reusable GitHub Action
 
-Based on: `openspec/research/extract-github-action.md` + Yoni's feedback
+Based on: `openspec/research/extract-github-action.md`
 
 ## Goal
 
-Create composite action that calls existing `apps/test-processing` scripts:
+Extract test data collection logic from workflow into a reusable **composite action**.
 
 ```yaml
 - uses: goldbergyoni/test-eyes@main
@@ -12,31 +12,37 @@ Create composite action that calls existing `apps/test-processing` scripts:
     junit-path: test-results.xml
 ```
 
-## Structure
+## Why Composite Action
 
-New app for the action, calls existing scripts:
+- `using: composite` - no build step, no bundling
+- Shell steps call existing scripts directly
+- Simpler than Node action (no `@actions/core`, no `ncc build`)
+
+## Structure
 
 ```
 apps/github-action/
-└── action.yml       # composite action
+├── action.yml       # composite action definition
+└── README.md        # installation guide
 
-apps/test-processing/
-└── scripts/         # existing scripts (no changes)
+# Existing scripts (unchanged):
+apps/example-app/scripts/parse-junit.js     # JUnit XML → JSON
+apps/test-processing/scripts/aggregate.js   # aggregate stats
 ```
 
-## action.yml
+## action.yml Steps
 
-Composite action (`using: composite`) with shell steps:
-1. Parse JUnit XML → calls existing parse script
-2. Git commit to data branch
-3. Aggregate → calls existing aggregate script
-
-No build step. No bundling. Just shell commands calling existing JS files.
+1. **Validate** - `test -f` with error message on failure
+2. **Parse** - `node apps/example-app/scripts/parse-junit.js`
+3. **Git** - config user, fetch/create data branch, commit JSON
+4. **Aggregate** - `node apps/test-processing/scripts/aggregate.js`
 
 ## Inputs
 
-- `junit-path` (required) - path to JUnit XML
-- `data-branch` (optional, default: `gh-data`)
+| Input | Required | Default | Description |
+|-------|----------|---------|-------------|
+| `junit-path` | yes | - | Path to JUnit XML file |
+| `data-branch` | no | `gh-data` | Branch for storing data |
 
 ## Out of Scope
 

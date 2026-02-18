@@ -1,17 +1,19 @@
 ## Tasks
 
-### 1. Create action app
-- [ ] Create `apps/github-action/action.yml` (composite action)
-- [ ] Define inputs: `junit-path`, `data-branch`
+### 1. Create composite action
+- [ ] Create `apps/github-action/action.yml`
+- [ ] Set `using: composite`
+- [ ] Define inputs: `junit-path` (required), `data-branch` (default: `gh-data`)
 
-### 2. Add composite steps
-- [ ] Step: validate junit-path exists
-- [ ] Step: run parse script from `apps/test-processing`
-- [ ] Step: git config + commit to data branch
-- [ ] Step: run aggregate script from `apps/test-processing`
+### 2. Implement composite steps
+- [ ] Validate: `test -f ${{ inputs.junit-path }} || (echo "Error: File not found: ${{ inputs.junit-path }}" && exit 1)`
+- [ ] Parse: `node apps/example-app/scripts/parse-junit.js ${{ inputs.junit-path }} test-data.json`
+- [ ] Git: config user, fetch/create data branch, commit JSON to `data/`
+- [ ] Aggregate: `node apps/test-processing/scripts/aggregate.js data`
 
 ### 3. Update workflow
-- [ ] Simplify `collect-test-data.yml` to use action
+- [ ] Replace inline steps in `collect-test-data.yml` with action usage
 
-### 4. README
-- [ ] Add installation guide with usage example
+### 4. Add README
+- [ ] Installation guide in `apps/github-action/README.md`
+- [ ] Usage example with permissions needed
