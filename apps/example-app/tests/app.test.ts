@@ -8,8 +8,8 @@ describe('auth', () => {
 
 describe('payments', () => {
   it('should charge card', async () => {
-    // Slow test - simulates payment processing
-    await new Promise(r => setTimeout(r, 1500))
+    // SLOWER: was 1500ms, now 3000ms
+    await new Promise(r => setTimeout(r, 3000))
     expect(true).toBe(true)
   })
 })
@@ -24,12 +24,16 @@ describe('profile', () => {
 
 describe('notifications', () => {
   it('should send email', () => {
-    expect(true).toBe(true)
+    // FAILING: was passing, now fails
+    expect(false).toBe(true)
   })
 })
 
-describe('settings', () => {
-  it('should save preferences', () => {
+// REMOVED: settings test was here
+
+// NEW: analytics test
+describe('analytics', () => {
+  it('should track page views', () => {
     expect(true).toBe(true)
   })
 })
