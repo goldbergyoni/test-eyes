@@ -1732,7 +1732,7 @@ for (const suite of suites) {
     tests.push({
       name: `${tc["@_classname"]} ${tc["@_name"]}`.trim(),
       durationMs: Math.round(parseFloat(tc["@_time"] || 0) * 1e3),
-      status: tc.failure ? "failed" : "passed"
+      status: tc.failure || tc.error || tc.skipped ? "failed" : "passed"
     });
   }
 }

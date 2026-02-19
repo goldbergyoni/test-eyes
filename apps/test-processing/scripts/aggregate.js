@@ -65,8 +65,18 @@ function aggregate() {
   // Process each new file
   for (const filename of newFiles) {
     const filepath = `${DATA_DIR}/${filename}`
-    // Yoni: No validation on the parsed JSON — a single malformed file crashes the entire aggregation with no useful error
-    const runData = JSON.parse(readFileSync(filepath, 'utf-8'))
+    let runData
+    try {
+      runData = JSON.parse(readFileSync(filepath, 'utf-8'))
+    } catch (e) {
+      console.warn(`Skipping ${filename}: invalid JSON`)
+      continue
+    }
+
+    if (!Array.isArray(runData.tests)) {
+      console.warn(`Skipping ${filename}: missing tests array`)
+      continue
+    }
 
     data.meta.totalRuns++
     data.meta.processedFiles.push(filename)
