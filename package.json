@@ -4,9 +4,10 @@
   "packageManager": "pnpm@9.15.4",
   "scripts": {
     "build": "turbo build",
-    "build:action": "pnpm run build:action:parse && pnpm run build:action:aggregate",
-    "build:action:parse": "esbuild apps/example-app/scripts/parse-junit.ts --bundle --platform=node --format=esm --outfile=action-dist/scripts/parse-junit.mjs --external:fs --external:path",
-    "build:action:aggregate": "esbuild apps/test-processing/scripts/aggregate.ts --bundle --platform=node --format=esm --outfile=action-dist/scripts/aggregate.mjs --external:fs --external:fs/promises --external:path",
+    "build:action": "pnpm run build:action:parse && pnpm run build:action:collector && pnpm run build:action:deploy",
+    "build:action:parse": "esbuild apps/example-app/scripts/parse-junit.ts --bundle --platform=node --format=esm --outfile=action-dist/scripts/parse-junit.mjs --external:fs --external:fs/promises --external:path --external:child_process --external:util",
+    "build:action:collector": "esbuild apps/test-processing/scripts/action-collect.ts --bundle --platform=node --format=esm --outfile=action-dist/scripts/collector.mjs --external:fs --external:fs/promises --external:path --external:child_process --external:util",
+    "build:action:deploy": "esbuild apps/test-processing/scripts/action-deploy.ts --bundle --platform=node --format=esm --outfile=action-dist/scripts/deploy.mjs --external:fs --external:fs/promises --external:path --external:child_process --external:util",
     "test": "turbo test",
     "dev": "turbo dev",
     "typecheck": "turbo typecheck"

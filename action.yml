@@ -22,58 +22,35 @@ runs:
           exit 1
         fi
 
-    - name: Parse JUnit XML
-      shell: bash
-      run: node ${{ github.action_path }}/action-dist/scripts/parse-junit.mjs "${{ inputs.junit-path }}" test-data.json
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22'
 
-    - name: Commit and aggregate
+    - name: Collect test data and deploy
       shell: bash
       env:
-        ACTION_SCRIPTS: ${{ github.action_path }}/action-dist/scripts
-        ACTION_DIST: ${{ github.action_path }}/action-dist
+        JUNIT_PATH: ${{ inputs.junit-path }}
+        GITHUB_SHA: ${{ github.sha }}
+        ACTION_PATH: ${{ github.action_path }}
       run: |
-        # Copy scripts to temp before switching branches
-        cp -r "$ACTION_SCRIPTS" /tmp/test-eyes-scripts
-        cp -r "$ACTION_DIST" /tmp/test-eyes-dist
+        # Copy action-dist to temp before branch switching
+        cp -r "$ACTION_PATH/action-dist" /tmp/test-eyes-dist
 
-        git config user.name "github-actions[bot]"
-        git config user.email "github-actions[bot]@users.noreply.github.com"
-
-        # Fetch both branches in one call
-        git fetch origin main gh-data 2>/dev/null || git fetch origin main
-
-        # Checkout or create data branch
-        git checkout gh-data 2>/dev/null || git checkout --orphan gh-data
-
-        # Setup data directory and copy new test data
-        mkdir -p data
-        cp ${{ github.workspace }}/test-data.json "data/$(date +%Y-%m-%d)_${GITHUB_SHA:0:7}.json"
-
-        # Run aggregate script from temp location
-        node /tmp/test-eyes-scripts/aggregate.mjs data
-
-        # Commit and push data
-        git add data/
-        git diff --staged --quiet || git commit -m "Add test data for ${GITHUB_SHA:0:7}"
-        git push origin gh-data
+        # Run the bundled collector script
+        node "$ACTION_PATH/action-dist/scripts/collector.mjs" \
+          --junit-path "$JUNIT_PATH" \
+          --commit-sha "$GITHUB_SHA" \
+          --data-branch "gh-data"
 
     - name: Deploy to GitHub Pages
       shell: bash
+      env:
+        GITHUB_SHA: ${{ github.sha }}
       run: |
-        # Create deploy directory with frontend (from temp copy)
-        mkdir -p _site
-        cp -r /tmp/test-eyes-dist/* _site/
-
-        # Copy aggregated data
-        mkdir -p _site/data
-        cp data/main-test-data.json _site/data/
-
-        # Deploy to gh-pages branch
-        git checkout --orphan gh-pages-deploy
-        git rm -rf . 2>/dev/null || true
-        cp -r _site/* .
-        rm -rf _site
-        touch .nojekyll
-        git add .
-        git commit -m "Deploy dashboard for ${GITHUB_SHA:0:7}"
-        git push origin gh-pages-deploy:gh-pages --force
+        # Deploy using the bundled deploy script
+        node /tmp/test-eyes-dist/scripts/deploy.mjs \
+          --dist-dir /tmp/test-eyes-dist \
+          --data-dir data \
+          --commit-sha "$GITHUB_SHA" \
+          --target-branch "gh-pages"
