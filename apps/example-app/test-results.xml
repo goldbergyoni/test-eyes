@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="6" failures="1" errors="0" time="1.511571885">
+    <testsuite name="tests/app.test.ts" timestamp="2026-02-20T13:10:05.005Z" hostname="runnervmwffz4" tests="6" failures="1" errors="0" skipped="0" time="1.511571885">
+        <testcase classname="tests/app.test.ts" name="auth &gt; should login successfully" time="0.001278921">
+        </testcase>
+        <testcase classname="tests/app.test.ts" name="payments &gt; should charge card" time="1.501467531">
+        </testcase>
+        <testcase classname="tests/app.test.ts" name="profile &gt; should load user data" time="0.006387925">
+            <failure message="expected false to be true // Object.is equality" type="AssertionError">
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ tests/app.test.ts:21:26
+            </failure>
+        </testcase>
+        <testcase classname="tests/app.test.ts" name="notifications &gt; should send email" time="0.000168606">
+        </testcase>
+        <testcase classname="tests/app.test.ts" name="settings &gt; should save preferences" time="0.000276197">
+        </testcase>
+        <testcase classname="tests/app.test.ts" name="reports &gt; should generate PDF report" time="0.000152054">
+        </testcase>
+    </testsuite>
+</testsuites>
