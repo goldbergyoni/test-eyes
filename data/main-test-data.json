@@ -1,8 +1,8 @@
 {
   "schemaVersion": "1.0.0",
   "meta": {
-    "totalRuns": 23,
-    "lastAggregatedAt": "2026-02-20T11:28:33.991Z",
+    "totalRuns": 24,
+    "lastAggregatedAt": "2026-02-20T13:10:06.368Z",
     "processedFiles": [
       "2026-02-13_3c8bd9e.json",
       "2026-02-13_c3d2a12.json",
@@ -26,34 +26,35 @@
       "2026-02-20_0bcd65f.json",
       "2026-02-20_0945e02.json",
       "2026-02-20_cfb1320.json",
-      "2026-02-20_9d7a8dd.json"
+      "2026-02-20_9d7a8dd.json",
+      "2026-02-20_b247d49.json"
     ]
   },
   "tests": {
     "tests/app.test.ts auth > should login successfully": {
-      "totalRuns": 23,
-      "passCount": 23,
+      "totalRuns": 24,
+      "passCount": 24,
       "failCount": 0,
       "avgDurationMs": 1,
       "p95DurationMs": 1
     },
     "tests/app.test.ts payments > should charge card": {
-      "totalRuns": 23,
-      "passCount": 23,
+      "totalRuns": 24,
+      "passCount": 24,
       "failCount": 0,
-      "avgDurationMs": 1698,
-      "p95DurationMs": 1707
+      "avgDurationMs": 1690,
+      "p95DurationMs": 1698
     },
     "tests/app.test.ts profile > should load user data": {
-      "totalRuns": 23,
+      "totalRuns": 24,
       "passCount": 15,
-      "failCount": 8,
+      "failCount": 9,
       "avgDurationMs": 2,
       "p95DurationMs": 2
     },
     "tests/app.test.ts notifications > should send email": {
-      "totalRuns": 23,
-      "passCount": 20,
+      "totalRuns": 24,
+      "passCount": 21,
       "failCount": 3,
       "avgDurationMs": 0,
       "p95DurationMs": 0
@@ -80,8 +81,8 @@
       "p95DurationMs": 0
     },
     "tests/app.test.ts settings > should save preferences": {
-      "totalRuns": 14,
-      "passCount": 14,
+      "totalRuns": 15,
+      "passCount": 15,
       "failCount": 0,
       "avgDurationMs": 0,
       "p95DurationMs": 0
@@ -89,6 +90,13 @@
     "tests/app.test.ts analytics > should track page views": {
       "totalRuns": 3,
       "passCount": 3,
+      "failCount": 0,
+      "avgDurationMs": 0,
+      "p95DurationMs": 0
+    },
+    "tests/app.test.ts reports > should generate PDF report": {
+      "totalRuns": 1,
+      "passCount": 1,
       "failCount": 0,
       "avgDurationMs": 0,
       "p95DurationMs": 0
