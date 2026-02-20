@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { useReactTable, getCoreRowModel, getSortedRowModel, flexRender, createColumnHelper } from '@tanstack/react-table'
 import type { SortingState } from '@tanstack/react-table'
 import { Title } from '@test-eyes/design-system'
+import { SearchInput } from './components/SearchInput'
+import { useTestFilter } from './hooks/useTestFilter'
 
 //Yoni: Create /src/pages
 interface AggregatedData {
@@ -62,8 +64,11 @@ export default function App() {
   const [meta, setMeta] = useState<AggregatedData['meta'] | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [searchQuery, setSearchQuery] = useState('')
   const [overviewSorting, setOverviewSorting] = useState<SortingState>([])
   const [slowestSorting, setSllowestSorting] = useState<SortingState>([{ id: 'p95DurationMs', desc: true }])
+
+  const filteredData = useTestFilter(data, searchQuery)
 
   useEffect(() => {
     async function fetchData() {
@@ -98,7 +103,7 @@ export default function App() {
   // Yoni: Important, a huge file, let's break down into components? #high
 
   const overviewTable = useReactTable({
-    data,
+    data: filteredData,
     columns: overviewColumns,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -107,7 +112,7 @@ export default function App() {
   })
 
   const slowestTable = useReactTable({
-    data,
+    data: filteredData,
     columns: slowestColumns,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -157,10 +162,20 @@ export default function App() {
         </p>
       )}
 
+      {!loading && !error && data.length > 0 && (
+        <div className="mb-6 max-w-md">
+          <SearchInput
+            value={searchQuery}
+            onChange={setSearchQuery}
+            placeholder="Search tests..."
+          />
+        </div>
+      )}
+
       {loading && <p>Loading...</p>}
       {error && <p className="text-red-400">Error: {error}</p>}
 
-      {!loading && !error && data.length > 0 && (
+      {!loading && !error && filteredData.length > 0 && (
         <>
           <section className="mb-12">
             <h2 className="text-xl font-semibold mb-4">Test Overview</h2>
@@ -176,6 +191,10 @@ export default function App() {
 
       {!loading && !error && data.length === 0 && (
         <p className="text-gray-500 mt-4">No test data yet. Run some PRs to collect data.</p>
+      )}
+
+      {!loading && !error && data.length > 0 && filteredData.length === 0 && (
+        <p className="text-gray-500 mt-4">No tests match "{searchQuery}"</p>
       )}
     </div>
   )
