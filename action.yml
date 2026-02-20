@@ -43,14 +43,12 @@ runs:
           --commit-sha "$GITHUB_SHA" \
           --data-branch "gh-data"
 
-    - name: Deploy to GitHub Pages
-      shell: bash
-      env:
-        GITHUB_SHA: ${{ github.sha }}
-      run: |
         # Deploy using the bundled deploy script
         node /tmp/test-eyes-dist/scripts/deploy.mjs \
           --dist-dir /tmp/test-eyes-dist \
           --data-dir data \
           --commit-sha "$GITHUB_SHA" \
           --target-branch "gh-pages"
+
+        # Restore original commit so action.yml exists for post-run
+        git checkout "$GITHUB_SHA" 2>/dev/null || true
