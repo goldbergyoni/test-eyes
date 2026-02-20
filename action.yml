@@ -28,7 +28,14 @@ runs:
 
     - name: Commit and aggregate
       shell: bash
+      env:
+        ACTION_SCRIPTS: ${{ github.action_path }}/action-dist/scripts
+        ACTION_DIST: ${{ github.action_path }}/action-dist
       run: |
+        # Copy scripts to temp before switching branches
+        cp -r "$ACTION_SCRIPTS" /tmp/test-eyes-scripts
+        cp -r "$ACTION_DIST" /tmp/test-eyes-dist
+
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
 
@@ -42,8 +49,8 @@ runs:
         mkdir -p data
         cp ${{ github.workspace }}/test-data.json "data/$(date +%Y-%m-%d)_${GITHUB_SHA:0:7}.json"
 
-        # Run aggregate script from action version
-        node ${{ github.action_path }}/action-dist/scripts/aggregate.mjs data
+        # Run aggregate script from temp location
+        node /tmp/test-eyes-scripts/aggregate.mjs data
 
         # Commit and push data
         git add data/
@@ -53,9 +60,9 @@ runs:
     - name: Deploy to GitHub Pages
       shell: bash
       run: |
-        # Create deploy directory with frontend
+        # Create deploy directory with frontend (from temp copy)
         mkdir -p _site
-        cp -r ${{ github.action_path }}/action-dist/* _site/
+        cp -r /tmp/test-eyes-dist/* _site/
 
         # Copy aggregated data
         mkdir -p _site/data
