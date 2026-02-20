@@ -39,7 +39,7 @@ jobs:
 
       # Run aggregation
       - name: Aggregate test data
-        run: node apps/test-processing/scripts/aggregate.js data
+        run: pnpm --filter test-processing cli aggregate data
 
       # Commit aggregated data back to gh-data
       - name: Commit aggregated data
