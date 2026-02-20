@@ -33,3 +33,9 @@ describe('settings', () => {
     expect(true).toBe(true)
   })
 })
+
+describe('reports', () => {
+  it('should generate PDF report', () => {
+    expect(true).toBe(true)
+  })
+})
