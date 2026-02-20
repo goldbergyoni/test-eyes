@@ -4,11 +4,16 @@
   "packageManager": "pnpm@9.15.4",
   "scripts": {
     "build": "turbo build",
+    "build:action": "pnpm run build:action:parse && pnpm run build:action:aggregate",
+    "build:action:parse": "esbuild apps/example-app/scripts/parse-junit.ts --bundle --platform=node --format=esm --outfile=action-dist/scripts/parse-junit.mjs --external:fs --external:path",
+    "build:action:aggregate": "esbuild apps/test-processing/scripts/aggregate.ts --bundle --platform=node --format=esm --outfile=action-dist/scripts/aggregate.mjs --external:fs --external:fs/promises --external:path",
     "test": "turbo test",
-    "dev": "turbo dev"
+    "dev": "turbo dev",
+    "typecheck": "turbo typecheck"
   },
   "devDependencies": {
     "esbuild": "^0.27.3",
-    "turbo": "^2.4.0"
+    "turbo": "^2.4.0",
+    "typescript": "^5.6.0"
   }
 }

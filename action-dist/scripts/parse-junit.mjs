@@ -136,12 +136,12 @@ var require_validator = __commonJS({
               }
               return getErrorObject("InvalidTag", msg, getLineNumberForPosition(xmlData, i));
             }
-            const result2 = readAttributeStr(xmlData, i);
-            if (result2 === false) {
+            const result = readAttributeStr(xmlData, i);
+            if (result === false) {
               return getErrorObject("InvalidAttr", "Attributes for '" + tagName + "' have open quote.", getLineNumberForPosition(xmlData, i));
             }
-            let attrStr = result2.value;
-            i = result2.index;
+            let attrStr = result.value;
+            i = result.index;
             if (attrStr[attrStr.length - 1] === "/") {
               const attrStrStart = i - attrStr.length;
               attrStr = attrStr.substring(0, attrStr.length - 1);
@@ -152,7 +152,7 @@ var require_validator = __commonJS({
                 return getErrorObject(isValid.err.code, isValid.err.msg, getLineNumberForPosition(xmlData, attrStrStart + isValid.err.line));
               }
             } else if (closingTag) {
-              if (!result2.tagClosed) {
+              if (!result.tagClosed) {
                 return getErrorObject("InvalidTag", "Closing tag '" + tagName + "' doesn't have proper closing.", getLineNumberForPosition(xmlData, i));
               } else if (attrStr.trim().length > 0) {
                 return getErrorObject("InvalidTag", "Closing tag '" + tagName + "' can't have attributes or invalid starting.", getLineNumberForPosition(xmlData, tagStartPos));
@@ -902,9 +902,9 @@ var require_OrderedObjParser = __commonJS({
             }
             i = endIndex;
           } else if (xmlData.substr(i + 1, 2) === "!D") {
-            const result2 = readDocType(xmlData, i);
-            this.docTypeEntities = result2.entities;
-            i = result2.i;
+            const result = readDocType(xmlData, i);
+            this.docTypeEntities = result.entities;
+            i = result.i;
           } else if (xmlData.substr(i + 1, 2) === "![") {
             const closeIndex = findClosingIndex(xmlData, "]]>", i, "CDATA is not closed.") - 2;
             const tagExp = xmlData.substring(i + 9, closeIndex);
@@ -918,12 +918,12 @@ var require_OrderedObjParser = __commonJS({
             }
             i = closeIndex + 2;
           } else {
-            let result2 = readTagExp(xmlData, i, this.options.removeNSPrefix);
-            let tagName = result2.tagName;
-            const rawTagName = result2.rawTagName;
-            let tagExp = result2.tagExp;
-            let attrExpPresent = result2.attrExpPresent;
-            let closeIndex = result2.closeIndex;
+            let result = readTagExp(xmlData, i, this.options.removeNSPrefix);
+            let tagName = result.tagName;
+            const rawTagName = result.rawTagName;
+            let tagExp = result.tagExp;
+            let attrExpPresent = result.attrExpPresent;
+            let closeIndex = result.closeIndex;
             if (this.options.transformTagName) {
               tagName = this.options.transformTagName(tagName);
             }
@@ -950,14 +950,14 @@ var require_OrderedObjParser = __commonJS({
                 } else {
                   tagExp = tagExp.substr(0, tagExp.length - 1);
                 }
-                i = result2.closeIndex;
+                i = result.closeIndex;
               } else if (this.options.unpairedTags.indexOf(tagName) !== -1) {
-                i = result2.closeIndex;
+                i = result.closeIndex;
               } else {
-                const result3 = this.readStopNodeData(xmlData, rawTagName, closeIndex + 1);
-                if (!result3) throw new Error(`Unexpected end of ${rawTagName}`);
-                i = result3.i;
-                tagContent = result3.tagContent;
+                const result2 = this.readStopNodeData(xmlData, rawTagName, closeIndex + 1);
+                if (!result2) throw new Error(`Unexpected end of ${rawTagName}`);
+                i = result2.i;
+                tagContent = result2.tagContent;
               }
               const childNode = new xmlNode(tagName);
               if (tagName !== tagExp && attrExpPresent) {
@@ -1007,10 +1007,10 @@ var require_OrderedObjParser = __commonJS({
       return xmlObj.child;
     };
     function addChild(currentNode, childNode, jPath) {
-      const result2 = this.options.updateTag(childNode.tagname, jPath, childNode[":@"]);
-      if (result2 === false) {
-      } else if (typeof result2 === "string") {
-        childNode.tagname = result2;
+      const result = this.options.updateTag(childNode.tagname, jPath, childNode[":@"]);
+      if (result === false) {
+      } else if (typeof result === "string") {
+        childNode.tagname = result;
         currentNode.addChild(childNode);
       } else {
         currentNode.addChild(childNode);
@@ -1099,10 +1099,10 @@ var require_OrderedObjParser = __commonJS({
       }
     }
     function readTagExp(xmlData, i, removeNSPrefix, closingChar = ">") {
-      const result2 = tagExpWithClosingIndex(xmlData, i + 1, closingChar);
-      if (!result2) return;
-      let tagExp = result2.data;
-      const closeIndex = result2.index;
+      const result = tagExpWithClosingIndex(xmlData, i + 1, closingChar);
+      if (!result) return;
+      let tagExp = result.data;
+      const closeIndex = result.index;
       const separatorIndex = tagExp.search(/\s/);
       let tagName = tagExp;
       let attrExpPresent = true;
@@ -1115,7 +1115,7 @@ var require_OrderedObjParser = __commonJS({
         const colonIndex = tagName.indexOf(":");
         if (colonIndex !== -1) {
           tagName = tagName.substr(colonIndex + 1);
-          attrExpPresent = tagName !== result2.data.substr(colonIndex + 1);
+          attrExpPresent = tagName !== result.data.substr(colonIndex + 1);
         }
       }
       return {
@@ -1297,9 +1297,9 @@ var require_XMLParser = __commonJS({
         }
         if (validationOption) {
           if (validationOption === true) validationOption = {};
-          const result2 = validator.validate(xmlData, validationOption);
-          if (result2 !== true) {
-            throw Error(`${result2.err.msg}:${result2.err.line}:${result2.err.col}`);
+          const result = validator.validate(xmlData, validationOption);
+          if (result !== true) {
+            throw Error(`${result.err.msg}:${result.err.line}:${result.err.col}`);
           }
         }
         const orderedObjParser = new OrderedObjParser(this.options);
@@ -1576,10 +1576,10 @@ var require_json2xml = __commonJS({
               else val += this.indentate(level) + "<" + key + "/" + this.tagEndChar;
             } else if (typeof item === "object") {
               if (this.options.oneListGroup) {
-                const result2 = this.j2x(item, level + 1, ajPath.concat(key));
-                listTagVal += result2.val;
+                const result = this.j2x(item, level + 1, ajPath.concat(key));
+                listTagVal += result.val;
                 if (this.options.attributesGroupName && item.hasOwnProperty(this.options.attributesGroupName)) {
-                  listTagAttr += result2.attrStr;
+                  listTagAttr += result.attrStr;
                 }
               } else {
                 listTagVal += this.processTextOrObjNode(item, key, level, ajPath);
@@ -1620,11 +1620,11 @@ var require_json2xml = __commonJS({
       } else return " " + attrName + '="' + val + '"';
     };
     function processTextOrObjNode(object, key, level, ajPath) {
-      const result2 = this.j2x(object, level + 1, ajPath.concat(key));
+      const result = this.j2x(object, level + 1, ajPath.concat(key));
       if (object[this.options.textNodeName] !== void 0 && Object.keys(object).length === 1) {
-        return this.buildTextValNode(object[this.options.textNodeName], key, result2.attrStr, level);
+        return this.buildTextValNode(object[this.options.textNodeName], key, result.attrStr, level);
       } else {
-        return this.buildObjectNode(result2.val, key, result2.attrStr, level);
+        return this.buildObjectNode(result.val, key, result.attrStr, level);
       }
     }
     Builder.prototype.buildObjectNode = function(val, key, attrStr, level) {
@@ -1715,33 +1715,70 @@ var require_fxp = __commonJS({
   }
 });
 
-// apps/example-app/scripts/parse-junit.js
+// apps/example-app/scripts/parse-junit.ts
 var import_fast_xml_parser = __toESM(require_fxp(), 1);
-import { readFileSync, writeFileSync } from "fs";
-var junitPath = process.argv[2] || "test-results.xml";
-var outputPath = process.argv[3] || "test-data.json";
-var xml = readFileSync(junitPath, "utf-8");
-var parser = new import_fast_xml_parser.XMLParser({ ignoreAttributes: false });
-var result = parser.parse(xml);
-var testsuites = result.testsuites?.testsuite || [result.testsuite];
-var suites = Array.isArray(testsuites) ? testsuites : [testsuites];
-var tests = [];
-for (const suite of suites) {
-  const cases = suite.testcase ? Array.isArray(suite.testcase) ? suite.testcase : [suite.testcase] : [];
-  for (const tc of cases) {
-    tests.push({
-      name: `${tc["@_classname"]} ${tc["@_name"]}`.trim(),
-      durationMs: Math.round(parseFloat(tc["@_time"] || 0) * 1e3),
-      status: tc.failure ? "failed" : "passed"
-    });
+import { readFile, writeFile } from "fs/promises";
+function normalizeToArray(value) {
+  if (!value) return [];
+  return Array.isArray(value) ? value : [value];
+}
+function getTestStatus(testCase) {
+  if (testCase.skipped !== void 0) return "skipped";
+  if (testCase.failure !== void 0 || testCase.error !== void 0) return "failed";
+  return "passed";
+}
+function parseTestCase(testCase) {
+  const className = testCase["@_classname"] || "";
+  const testName = testCase["@_name"] || "unknown";
+  const name = className ? `${className} ${testName}` : testName;
+  return {
+    name: name.trim(),
+    durationMs: Math.round(parseFloat(testCase["@_time"] || "0") * 1e3),
+    status: getTestStatus(testCase)
+  };
+}
+function parseJUnitXml(xml) {
+  const parser = new import_fast_xml_parser.XMLParser({
+    ignoreAttributes: false,
+    attributeNamePrefix: "@_"
+  });
+  const result = parser.parse(xml);
+  const tests = [];
+  const testsuites = result.testsuites?.testsuite || result.testsuite;
+  const suites = normalizeToArray(testsuites);
+  for (const suite of suites) {
+    const testCases = normalizeToArray(suite.testcase);
+    for (const testCase of testCases) {
+      tests.push(parseTestCase(testCase));
+    }
+  }
+  return tests;
+}
+function buildOutputData(tests) {
+  const sha = process.env.GITHUB_SHA || "local";
+  const date = (/* @__PURE__ */ new Date()).toISOString().split("T")[0];
+  return {
+    runId: `${date}_${sha.slice(0, 7)}`,
+    prNumber: parseInt(process.env.PR_NUMBER || "0", 10),
+    commitSha: sha,
+    createdAt: (/* @__PURE__ */ new Date()).toISOString(),
+    tests
+  };
+}
+async function main() {
+  const junitPath = process.argv[2] || "test-results.xml";
+  const outputPath = process.argv[3] || "test-data.json";
+  try {
+    const xml = await readFile(junitPath, "utf-8");
+    const tests = parseJUnitXml(xml);
+    const output = buildOutputData(tests);
+    await writeFile(outputPath, JSON.stringify(output, null, 2));
+    console.log(`Parsed ${tests.length} tests to ${outputPath}`);
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(`Error: ${error.message}`);
+    }
+    process.exit(1);
   }
 }
-var output = {
-  runId: `${(/* @__PURE__ */ new Date()).toISOString().split("T")[0]}_${process.env.GITHUB_SHA?.slice(0, 7) || "local"}`,
-  prNumber: parseInt(process.env.PR_NUMBER || "0"),
-  commitSha: process.env.GITHUB_SHA || "local",
-  createdAt: (/* @__PURE__ */ new Date()).toISOString(),
-  tests
-};
-writeFileSync(outputPath, JSON.stringify(output, null, 2));
-console.log(`Parsed ${tests.length} tests to ${outputPath}`);
+main();
